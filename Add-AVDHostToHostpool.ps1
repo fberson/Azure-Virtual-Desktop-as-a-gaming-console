@@ -10,7 +10,7 @@
     The script is designed and optimized to run as PowerShell Extension as part of a JSON deployment.
     V1 of this script generates its own host pool registrationkey, this V2 version accepts the registrationkey as a parameter
 .NOTES  
-    File Name  : add-WVDHostToHostpoolSpringV2.ps1
+    File Name  : Add-AVDGPUHostToHostpool.ps1
     Author     : Freek Berson - Wortell - RDSGurus
     Version    : v1.0.0
 .EXAMPLE
@@ -65,5 +65,9 @@ Start-sleep 30
 #Install the WVD Bootloader
 Log "Install the Boot Loader"
 Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $WVDBootLoaderInstaller", "/quiet", "/qn", "/norestart", "/passive", "/l* C:\Users\AgentBootLoaderInstall.txt" | Wait-process
+
+#Configure GPU settngs
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'bEnumerateHWBeforeSW' -Value 1  -PropertyType 'DWORD'
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'AVCHardwareEncodePreferred' -Value 1  -PropertyType 'DWORD'
 
 Log "Finished"
