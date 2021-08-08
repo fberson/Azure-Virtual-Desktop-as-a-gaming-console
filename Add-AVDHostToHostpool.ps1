@@ -70,4 +70,8 @@ Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $WVDBootLoaderInstaller"
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'bEnumerateHWBeforeSW' -Value 1  -PropertyType 'DWORD'
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'AVCHardwareEncodePreferred' -Value 1  -PropertyType 'DWORD'
 
+#Configure direct path settings
+New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations' -Name 'fUseUdpPortRedirector' -PropertyType:dword -Value 1 -Force
+New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations' -Name 'UdpPortNumber' -PropertyType:dword -Value 3390 -Force
+
 Log "Finished"
