@@ -5,8 +5,10 @@
     This scripts adds an AVD Session Host to an existing AVD Hostpool by performing the following action:
     - Download the AVD agent
     - Download the AVD Boot Loader
+    - Download the AVD MMR Extension
     - Install the AVD Agent, using the provided hostpoolRegistrationToken
     - Install the AVD Boot Loader
+    - Install the AVD MMR Extension
     - Configure GPU settings
     - Configure Direct Path
     The script is designed and optimized to run as PowerShell Extension as part of a JSON deployment.
