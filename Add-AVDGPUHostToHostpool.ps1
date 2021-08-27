@@ -1,12 +1,12 @@
 <#  
 .SYNOPSIS  
-    Adds an WVD Session Host to an existing WVD Hostpool using a provided registrationKey and configures GPU and direct path settings
+    Adds an AVD Session Host to an existing AVD Hostpool using a provided registrationKey and configures GPU and direct path settings
 .DESCRIPTION  
-    This scripts adds an WVD Session Host to an existing WVD Hostpool by performing the following action:
-    - Download the WVD agent
-    - Download the WVD Boot Loader
-    - Install the WVD Agent, using the provided hostpoolRegistrationToken
-    - Install the WVD Boot Loader
+    This scripts adds an AVD Session Host to an existing AVD Hostpool by performing the following action:
+    - Download the AVD agent
+    - Download the AVD Boot Loader
+    - Install the AVD Agent, using the provided hostpoolRegistrationToken
+    - Install the AVD Boot Loader
     - Configure GPU settings
     - Configure Direct Path
     The script is designed and optimized to run as PowerShell Extension as part of a JSON deployment.
@@ -16,7 +16,7 @@
     Author     : Freek Berson - Wortell - RDSGurus
     Version    : v1.0.0
 .EXAMPLE
-    .\Add-AVDGPUHostToHostpool.ps1 registrationKey >> <yourlogdir>\add-WVDHostToHostpoolSpringV2.log
+    .\Add-AVDGPUHostToHostpool.ps1 registrationKey >> <yourlogdir>\add-AVDHostToHostpoolSpringV2.log
 .DISCLAIMER
     Use at your own risk. This scripts are provided AS IS without warranty of any kind. The author further disclaims all implied
     warranties including, without limitation, any implied warranties of merchantability or of fitness for a particular purpose. The entire risk
@@ -31,42 +31,46 @@ $registrationKey = $args[0]
 
 #Set Variables
 $RootFolder = "C:\Packages\Plugins\"
-$WVDAgentInstaller = $RootFolder+"WVD-Agent.msi"
-$WVDBootLoaderInstaller = $RootFolder+"WVD-BootLoader.msi"
+$AVDAgentInstaller = $RootFolder + "AVD-Agent.msi"
+$AVDBootLoaderInstaller = $RootFolder + "AVD-BootLoader.msi"
+$AVDMMRInstaller = $RootFolder + "AVD-MMR.msi"
 
 #Create Folder structure
-if (!(Test-Path -Path $RootFolder)){New-Item -Path $RootFolder -ItemType Directory}
+if (!(Test-Path -Path $RootFolder)) { New-Item -Path $RootFolder -ItemType Directory }
 
 #Configure logging
-function log
-{
-   param([string]$message)
-   "`n`n$(get-date -f o)  $message" 
+function log {
+    param([string]$message)
+    "`n`n$(get-date -f o)  $message" 
 }
 
 #Download all source file async and wait for completion
-log  "Download WVD Agent & bootloader"
+log  "Download AVD Agent & bootloader"
 $files = @(
-    @{url = "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv"; path = $WVDAgentInstaller}
-    @{url = "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH"; path = $WVDBootLoaderInstaller}
+    @{url = "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv"; path = $AVDAgentInstaller }
+    @{url = "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH"; path = $AVDBootLoaderInstaller }
+    @{url = "https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWIzIk"; path = $AVDMMRInstaller }
 )
-$workers = foreach ($f in $files)
-{ 
+$workers = foreach ($f in $files) { 
     $wc = New-Object System.Net.WebClient
     Write-Output $wc.DownloadFileTaskAsync($f.url, $f.path)
 }
 $workers.Result
 
-#Install the WVD Agent
-Log "Install the WVD Agent"
-Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $WVDAgentInstaller", "/quiet", "/qn", "/norestart", "/passive", "REGISTRATIONTOKEN=$registrationKey", "/l* C:\Users\AgentInstall.txt" | Wait-process
+#Install the AVD Agent
+Log "Install the AVD Agent"
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $AVDAgentInstaller", "/quiet", "/qn", "/norestart", "/passive", "REGISTRATIONTOKEN=$registrationKey", "/l* C:\Users\AgentInstall.txt" | Wait-process
 
-#Wait to ensure WVD Agent has enough time to finish
+#Wait to ensure AVD Agent has enough time to finish
 Start-sleep 30
 
-#Install the WVD Bootloader
+#Install the AVD Bootloader
 Log "Install the Boot Loader"
-Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $WVDBootLoaderInstaller", "/quiet", "/qn", "/norestart", "/passive", "/l* C:\Users\AgentBootLoaderInstall.txt" | Wait-process
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $AVDBootLoaderInstaller", "/quiet", "/qn", "/norestart", "/passive", "/l* C:\Users\AgentBootLoaderInstall.txt" | Wait-process
+
+#Install the AVD MultiMedia Redirection Browser Extension
+Log "Install the Boot Loader"
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $AVDMMRInstaller", "/quiet", "/qn", "/norestart", "/passive" | Wait-process
 
 #Configure GPU settngs
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'bEnumerateHWBeforeSW' -Value 1  -PropertyType 'DWORD'
