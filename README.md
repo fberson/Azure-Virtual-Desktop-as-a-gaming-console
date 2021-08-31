@@ -3,7 +3,7 @@ This repository contains source codes, samples and videos presented in the sessi
 
 <a href="https://youtu.be/NmNbgH2rLfw">Running Doom inside Azure Virtual Desktop</a>
 
-<a href="">Running Fortnite inside Azure Virtual Desktop</a>
+<a href="https://youtu.be/6cMD8_U4Keg">Running Fortnite inside Azure Virtual Desktop</a>
 
 <a href="">Running Flight Simulator inside Azure Virtual Desktop</a>
 
