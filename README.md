@@ -1,7 +1,7 @@
 #  Azure Virtual Desktop as a gaming console
 This repository contains source codes, samples and videos presented in the session "Azure Virtual Desktop as a gaming console"
 
-<img align="right" src="">
+<img align="right" src="https://github.com/fberson/Azure-Virtual-Desktop-as-a-gaming-console/blob/main/Visualizer.png">
 
 File | Contents
 ----------------------------------------- | -------------
