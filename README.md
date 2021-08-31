@@ -5,7 +5,7 @@ This repository contains source codes, samples and videos presented in the sessi
 
 <a href="https://youtu.be/6cMD8_U4Keg">Running Fortnite inside Azure Virtual Desktop</a>
 
-<a href="">Running Flight Simulator inside Azure Virtual Desktop</a>
+<a href="https://youtu.be/9-w7iVDQ7n4">Running Flight Simulator inside Azure Virtual Desktop</a>
 
 <a href="https://youtu.be/G-jGSm_DP3A">Running Larry inside Azure Virtual Desktop</a>
 
