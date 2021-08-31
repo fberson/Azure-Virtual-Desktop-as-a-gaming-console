@@ -7,7 +7,7 @@ This repository contains source codes, samples and videos presented in the sessi
 
 <a href="">Running Flight Simulator inside Azure Virtual Desktop</a>
 
-<a href="">Running Larry inside Azure Virtual Desktop</a>
+<a href="https://youtu.be/G-jGSm_DP3A">Running Larry inside Azure Virtual Desktop</a>
 
 
 <img align="center" src="https://github.com/fberson/Azure-Virtual-Desktop-as-a-gaming-console/blob/main/Visualizer.png">
