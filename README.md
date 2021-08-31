@@ -1,7 +1,7 @@
 #  Azure Virtual Desktop as a gaming console
 This repository contains source codes, samples and videos presented in the session "Azure Virtual Desktop as a gaming console"
 
-<a href="">Running Doom inside Azure Virtual Desktop</a>
+<a href="https://youtu.be/NmNbgH2rLfw">Running Doom inside Azure Virtual Desktop</a>
 
 <a href="">Running Fortnite inside Azure Virtual Desktop</a>
 
