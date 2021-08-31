@@ -8,4 +8,7 @@ Adds an WVD Session Host to an existing WVD Hostpool using a provided registrati
 - main.bicep
 The main bicep file that deploys the full environment leveraging the various Bicep modules
 
-
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
