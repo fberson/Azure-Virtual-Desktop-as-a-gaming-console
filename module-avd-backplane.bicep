@@ -26,7 +26,7 @@ resource hp 'Microsoft.DesktopVirtualization/hostPools@2021-03-09-preview' = {
     preferredAppGroupType: preferredAppGroupType
     validationEnvironment: enableValiatioMode
     registrationInfo: {
-      expirationTime: dateTimeAdd(expirationTime, 'PT2H')
+      expirationTime: dateTimeAdd(expirationTime,'PT2H')
       registrationTokenOperation: 'Update'
     }
     startVMOnConnect: startVMOnConnect

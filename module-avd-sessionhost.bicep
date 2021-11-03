@@ -8,6 +8,11 @@ param hostNamePrefixWVD string
 param numberOfInstancesWVD int
 param ouLocationWVDSessionHost string
 param virtualMachineSizeWVD string
+@allowed([
+  'Nvidia'
+  'AMD'
+  'None'
+])
 param gpuType string
 
 @secure()

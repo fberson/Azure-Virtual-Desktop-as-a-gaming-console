@@ -1,34 +1,34 @@
 targetScope = 'subscription'
 
 //Define AVD deployment parameters
-param resourceGroupPrefix string
-param resourceGroupPostfix string
-param AVDbackplanelocation string
+param resourceGroupPrefix string = 'BICEP-AVD-GAMING-DEMO-'
+param resourceGroupPostfix string = '-RG'
+param AVDbackplanelocation string = 'westeurope'
 param hostPoolType string = 'pooled'
 param loadBalancerType string = 'BreadthFirst'
 param hostpoolFriendlyName string = 'Hostpool with AVD Gaming Desktop'
 param appgroupDesktopFriendlyName string = 'AppGroup with AVD Gaming Desktop'
 param workspaceFriendlyName string = 'AVD Gaming Demo'
-param hostpoolName string
-param appgroupName string
-param workspaceName string
+param hostpoolName string = 'BICEP-AVD-HP-DEMO'
+param appgroupName string = 'BICEP-AVD-AG-DEMO'
+param workspaceName string = 'BICEP-AVD-WS-DEMO'
 param preferredAppGroupType string = 'Desktop'
 
 //define log analytics parameters
-param logAnalyticsWorkspaceName string
+param logAnalyticsWorkspaceName string = 'BICEP-AVD-DEMO-3'
 param logAnalyticsWorkspaceSku string = 'pergb2018'
 
 //Define Networking deployment parameters
-param vnetName string
-param vnetaddressPrefix string
-param subnetPrefix string
-param subnetName string
-param dnsServer string
+param vnetName string = 'BICEP-AVD-GAMING-VNET'
+param vnetaddressPrefix string = '10.80.0.0/16'
+param subnetPrefix string = '10.80.10.0/24'
+param subnetName string = 'BICEP-AVD-GAMING-SUBNET'
+param dnsServer string = '10.50.1.4'
 
 //define peering parameters
 param createPeering bool = true
-param remoteVnetName string
-param remoteVnetRg string
+param remoteVnetName string = 'NINJA-WE-P-VNET-10-50-0-0-16'
+param remoteVnetRg string = 'NINJA-WE-P-RG-NETWORK'
 
 //define session host parameters
 param vmNameprefix string = 'AVD-Gaming'
@@ -38,14 +38,17 @@ param vmNameprefix string = 'AVD-Gaming'
 ])
 param gpuType string = 'Nvidia'
 param vmSize string = 'Standard_NV6'
-param avSetName string
-param ouLocationWVDSessionHost string
-param domainJoinUSer string
+param avSetName string = 'avsetdemo'
+param ouLocationWVDSessionHost string = 'OU=Bicep-demo,OU=WVD-SpringRelease,OU=Servers,OU=NINJA,DC=wvd,DC=ninja'
+param domainJoinUSer string = 'ninja-svc-wvd@wvd.ninja'
 @secure()
 param secretValueDomainJoin string
-param adDomainName string
+param adDomainName string = 'wvd.ninja'
 @secure()
 param secretValueLocalAdminPassword string
+
+//var logAnalyticsWorkspaceID = '/subscriptions/'
+//"/subscriptions/66869840-a086-41d1-84e9-cf66ac8a9a94/resourcegroups/bicep-avd-gaming-demo-monitoring-rg/providers/microsoft.operationalinsights/workspaces/bicep-avd-demo-3"
 
 var AVDbackplanes = [
   {
@@ -83,8 +86,8 @@ resource rgAVDhost 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   location: 'westeurope'
 }
 
-//Create AVD Prod backplane objects and configure Log Analytics Diagnostics Settings
-module AVDbackplaneprod './module-avd-backplane.bicep' = [for AVDbackplane in AVDbackplanes: {
+@description('Create AVD Prod backplane objects')
+module AVDbackplaneprod 'br/CoreModules:module-avd-backplane:v1' = [for AVDbackplane in AVDbackplanes: {
   name: '${AVDbackplane.hostpoolName}-deploy'
   scope: rgAVD
   params: {
@@ -103,8 +106,8 @@ module AVDbackplaneprod './module-avd-backplane.bicep' = [for AVDbackplane in AV
   }
 }]
 
-//Create AVD Netwerk, Subnet and template image VM
-module AVDnetwork './module-avd-network.bicep' = {
+@description('Create AVD NetwertandSubnet')
+module AVDnetwork 'br/CoreModules:module-avd-network:v1' = {
   name: 'AVDnetwork'
   scope: rgnw
   params: {
@@ -121,8 +124,8 @@ module AVDnetwork './module-avd-network.bicep' = {
   }
 }
 
-//Create Azure Log Analytics Workspace
-module AVDla './module-avdlog-analytics.bicep' = {
+@description('Create Azure Log Analytics Workspace')
+module AVDla 'br/CoreModules:module-avdlog-analytics:v1' = {
   name: 'AVDla'
   scope: rgmon
   params: {
@@ -132,8 +135,21 @@ module AVDla './module-avdlog-analytics.bicep' = {
   }
 }
 
-//Create the AVD Session Host with GPU support
-module AVDSessionHost 'module-avd-sessionhost.bicep' = {
+@description('Config log analytics for all AVD control plane resources')
+module AVDMon 'br/CoreModules:module-avd-monitor:v1' = {
+  name: 'AVDMon'
+  scope: rgmon
+  params: {
+    appGroupName: appgroupName
+    AVDBackplaneResourceGroup: rgAVD.name
+    hostpoolName: hostpoolName
+    logAnalyticsWorkspaceID: AVDla.outputs.logAnalyticsWorkspaceResourceID
+    workspaceName: workspaceName
+  }
+}
+
+@description('Create the AVD Session Host with GPU support')
+module AVDSessionHost 'br/CoreModules:module-avd-sessionhost:v1' = {
   scope: rgAVDhost
   name: 'AVDSessionHost'
   params: {
@@ -152,4 +168,7 @@ module AVDSessionHost 'module-avd-sessionhost.bicep' = {
     adDomainName: adDomainName
     gpuType: gpuType
   }
+  dependsOn: [
+    AVDbackplaneprod
+  ]
 }

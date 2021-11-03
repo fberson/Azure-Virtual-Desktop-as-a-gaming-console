@@ -14,4 +14,4 @@ resource AVDla 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
   }
 }
 
-output logAnalyticsWorkspaceID string = AVDla.id
+output logAnalyticsWorkspaceResourceID string = resourceId('Microsoft.OperationalInsights/workspaces',AVDla.name)

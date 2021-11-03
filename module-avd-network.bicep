@@ -55,7 +55,7 @@ resource peertoadds 'microsoft.network/virtualNetworks/virtualNetworkPeerings@20
 }
 
 //Optionally create vnet peering from an ADDS vnet
-module peerfromadds './module-avd-vnet-peering.bicep' = if (createPeering) {
+module peerfromadds 'br/CoreModules:module-avd-vnet-peering:v1' = if (createPeering) {
   name: 'peering'
   scope: resourceGroup(remoteVnetRg)
   params: {

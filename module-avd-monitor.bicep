@@ -5,7 +5,7 @@ param hostpoolName string
 param workspaceName string
 param appGroupName string
 
-module AVDhostpooldiag 'module-avd-diag-hostpool.bicep' = {
+module AVDhostpooldiag 'br/CoreModules:module-avd-diag-hostpool:v1' = {
   name: 'AVDhostpooldiag1'
   scope: resourceGroup(AVDBackplaneResourceGroup)
   params: {
@@ -14,7 +14,7 @@ module AVDhostpooldiag 'module-avd-diag-hostpool.bicep' = {
   }
 }
 
-module AVDWorkspacediag 'module-avd-diag-workspace.bicep' = {
+module AVDWorkspacediag 'br/CoreModules:module-avd-diag-workspace:v1' = {
   name: 'AVDWorkspacediag1'
   scope: resourceGroup(AVDBackplaneResourceGroup)
   params: {
@@ -23,7 +23,7 @@ module AVDWorkspacediag 'module-avd-diag-workspace.bicep' = {
   }
 }
 
-module AVDAppGroupdiag 'module-avd-diag-appgroup.bicep' = {
+module AVDAppGroupdiag 'br/CoreModules:module-avd-diag-appgroup:v1' = {
   name: 'AVDAppGroupdiag1'
   scope: resourceGroup(AVDBackplaneResourceGroup)
   params: {
