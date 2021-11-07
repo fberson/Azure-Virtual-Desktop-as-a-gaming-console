@@ -150,7 +150,7 @@ var AVDbackplanes = [
 ]
 
 //Concat the PoolArmPath required by the scalingplan
-var scalingPlanhostPoolArmPath = '${subscription().id}/resourcegroups/${rgAVD.name}/resourcegroups/${hostpoolName}'
+var scalingPlanhostPoolArmPath = '${subscription().id}/resourcegroups/${rgAVD.name}/providers/Microsoft.DesktopVirtualization/hostpools/${hostpoolName}'
 
 //Create Resource Groups
 resource rgnw 'Microsoft.Resources/resourceGroups@2020-06-01' = {
