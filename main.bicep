@@ -47,8 +47,89 @@ param adDomainName string = 'wvd.ninja'
 @secure()
 param secretValueLocalAdminPassword string
 
-//var logAnalyticsWorkspaceID = '/subscriptions/'
-//"/subscriptions/66869840-a086-41d1-84e9-cf66ac8a9a94/resourcegroups/bicep-avd-gaming-demo-monitoring-rg/providers/microsoft.operationalinsights/workspaces/bicep-avd-demo-3"
+// Scaling plan & schedule parameters
+param scalingPlanDescription string = 'Demo scaling plan'
+param scalingPlanExclusionTag string = 'ExcludeTag'
+param scalingPlanFriendlyName string = 'This is a demo scaling plan'
+@allowed([
+  'Pooled'
+])
+param scalingPlanHostPoolType string = 'Pooled'
+param scalingPlanLocation string = 'westeurope'
+param scalingPlanName string = 'BicepDemoScalingPlan'
+param scalingPlanTimeZone string = 'W. Europe Standard Time'
+param weekdaysScheduleName string = 'Demo weekdays'
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekdaysSchedulepeakLoadBalancingAlgorithm string = 'BreadthFirst'
+param weekdaysSchedulepeakStartTimeHour int = 9
+param weekdaysSchedulepeakStartTimeMinute int = 0
+param weekdaysSchedulerampDownCapacityThresholdPct int = 10
+param weekdaysSchedulerampDownForceLogoffUsers bool = false
+param weekdaysSchedulerampDownMinimumHostsPct int = 10
+param weekdaysSchedulerampDownStartTimeHour int = 18
+param weekdaysSchedulerampDownStartTimeMinute int = 0
+@allowed([
+  'ZeroSessions'
+  'ZeroActiveSessions'
+])
+param weekdaysSchedulerampDownStopHostsWhen string = 'ZeroSessions'
+param weekdaysSchedulerampUpCapacityThresholdPct int = 60
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekdaysSchedulerampUpLoadBalancingAlgorithm string = 'DepthFirst'
+param weekdaysSchedulerampUpMinimumHostsPct int = 20
+param weekdaysSchedulerampUpStartTimeHour int = 8
+param weekdaysSchedulerampUpStartTimeMinute int = 0
+param weekdaysScheduleoffPeakStartTimeHour int = 20
+param weekdaysScheduleoffPeakStartTimeMinute int = 0
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekdaysSchedulerampDownLoadBalancingAlgorithm string = 'DepthFirst'
+param weekdaysrampDownWaitTimeMinutes int = 30
+param weekdaysrampDownNotificationMessage string = 'You will be logged off in 30 min. Make sure to save your work.'
+param weekendsScheduleName string = 'Demo weekends'
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekendsSchedulepeakLoadBalancingAlgorithm string = 'BreadthFirst'
+param weekendsSchedulepeakStartTimeHour int = 9
+param weekendsSchedulepeakStartTimeMinute int = 0
+param weekendsSchedulerampDownCapacityThresholdPct int = 10
+param weekendsSchedulerampDownForceLogoffUsers bool = false
+param weekendsSchedulerampDownMinimumHostsPct int = 10
+param weekendsSchedulerampDownStartTimeHour int = 18
+param weekendsSchedulerampDownStartTimeMinute int = 0
+@allowed([
+  'ZeroSessions'
+  'ZeroActiveSessions'
+])
+param weekendsSchedulerampDownStopHostsWhen string = 'ZeroSessions'
+param weekendsSchedulerampUpCapacityThresholdPct int = 60
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekendsSchedulerampUpLoadBalancingAlgorithm string = 'DepthFirst'
+param weekendsSchedulerampUpMinimumHostsPct int = 20
+param weekendsSchedulerampUpStartTimeHour int = 8
+param weekendsSchedulerampUpStartTimeMinute int = 0
+param weekendsScheduleoffPeakStartTimeHour int = 20
+param weekendsScheduleoffPeakStartTimeMinute int = 0
+@allowed([
+  'BreadthFirst'
+  'DepthFirst'
+])
+param weekendsSchedulerampDownLoadBalancingAlgorithm string = 'DepthFirst'
+param weekendsrampDownWaitTimeMinutes int = 30
+param weekendsrampDownNotificationMessage string = 'You will be logged off in 30 min. Make sure to save your work.'
 
 var AVDbackplanes = [
   {
@@ -68,6 +149,9 @@ var AVDbackplanes = [
   }
 ]
 
+//Concat the PoolArmPath required by the scalingplan
+var scalingPlanhostPoolArmPath = '${subscription().id}/resourcegroups/${rgAVD.name}/resourcegroups/${hostpoolName}'
+
 //Create Resource Groups
 resource rgnw 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: '${resourceGroupPrefix}NETWORK${resourceGroupPostfix}'
@@ -83,6 +167,10 @@ resource rgmon 'Microsoft.Resources/resourceGroups@2020-06-01' = {
 }
 resource rgAVDhost 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: '${resourceGroupPrefix}HOSTS${resourceGroupPostfix}'
+  location: 'westeurope'
+}
+resource rdScaling 'Microsoft.Resources/resourceGroups@2020-06-01' = {
+  name: '${resourceGroupPrefix}SCALING${resourceGroupPostfix}'
   location: 'westeurope'
 }
 
@@ -167,6 +255,65 @@ module AVDSessionHost 'br/CoreModules:module-avd-sessionhost:v1' = {
     ouLocationWVDSessionHost: ouLocationWVDSessionHost
     adDomainName: adDomainName
     gpuType: gpuType
+  }
+  dependsOn: [
+    AVDbackplaneprod
+  ]
+}
+
+module AVDScaling 'br/CoreModules:module-avd-scaling-plan:v1' = {
+  scope: rdScaling
+  name: 'rdScaling'
+  params: {
+    scalingPlanDescription: scalingPlanDescription
+    scalingPlanExclusionTag: scalingPlanExclusionTag
+    scalingPlanFriendlyName: scalingPlanFriendlyName
+    scalingPlanHostPoolType: scalingPlanHostPoolType
+    scalingPlanLocation: scalingPlanLocation
+    scalingPlanName: scalingPlanName
+    scalingPlanTimeZone: scalingPlanTimeZone
+    scalingPlanhostPoolArmPath: scalingPlanhostPoolArmPath
+    scalingPlanEnabled: true
+    weekdaysrampDownNotificationMessage: weekdaysrampDownNotificationMessage
+    weekdaysrampDownWaitTimeMinutes: weekdaysrampDownWaitTimeMinutes
+    weekdaysScheduleName: weekdaysScheduleName
+    weekdaysScheduleoffPeakStartTimeHour: weekdaysScheduleoffPeakStartTimeHour
+    weekdaysScheduleoffPeakStartTimeMinute: weekdaysScheduleoffPeakStartTimeMinute
+    weekdaysSchedulepeakLoadBalancingAlgorithm: weekdaysSchedulepeakLoadBalancingAlgorithm
+    weekdaysSchedulepeakStartTimeHour: weekdaysSchedulepeakStartTimeHour
+    weekdaysSchedulepeakStartTimeMinute: weekdaysSchedulepeakStartTimeMinute
+    weekdaysSchedulerampDownCapacityThresholdPct: weekdaysSchedulerampDownCapacityThresholdPct
+    weekdaysSchedulerampDownForceLogoffUsers: weekdaysSchedulerampDownForceLogoffUsers
+    weekdaysSchedulerampDownLoadBalancingAlgorithm: weekdaysSchedulerampDownLoadBalancingAlgorithm
+    weekdaysSchedulerampDownMinimumHostsPct: weekdaysSchedulerampDownMinimumHostsPct
+    weekdaysSchedulerampDownStartTimeHour: weekdaysSchedulerampDownStartTimeHour
+    weekdaysSchedulerampDownStartTimeMinute: weekdaysSchedulerampDownStartTimeMinute
+    weekdaysSchedulerampDownStopHostsWhen: weekdaysSchedulerampDownStopHostsWhen
+    weekdaysSchedulerampUpCapacityThresholdPct: weekdaysSchedulerampUpCapacityThresholdPct
+    weekdaysSchedulerampUpLoadBalancingAlgorithm: weekdaysSchedulerampUpLoadBalancingAlgorithm
+    weekdaysSchedulerampUpMinimumHostsPct: weekdaysSchedulerampUpMinimumHostsPct
+    weekdaysSchedulerampUpStartTimeHour: weekdaysSchedulerampUpStartTimeHour
+    weekdaysSchedulerampUpStartTimeMinute: weekdaysSchedulerampUpStartTimeMinute
+    weekendsrampDownNotificationMessage: weekendsrampDownNotificationMessage
+    weekendsrampDownWaitTimeMinutes: weekendsrampDownWaitTimeMinutes
+    weekendsScheduleName: weekendsScheduleName
+    weekendsScheduleoffPeakStartTimeHour: weekendsScheduleoffPeakStartTimeHour
+    weekendsScheduleoffPeakStartTimeMinute: weekendsScheduleoffPeakStartTimeMinute
+    weekendsSchedulepeakLoadBalancingAlgorithm: weekendsSchedulepeakLoadBalancingAlgorithm
+    weekendsSchedulepeakStartTimeHour: weekendsSchedulepeakStartTimeHour
+    weekendsSchedulepeakStartTimeMinute: weekendsSchedulepeakStartTimeMinute
+    weekendsSchedulerampDownCapacityThresholdPct: weekendsSchedulerampDownCapacityThresholdPct
+    weekendsSchedulerampDownForceLogoffUsers: weekendsSchedulerampDownForceLogoffUsers
+    weekendsSchedulerampDownLoadBalancingAlgorithm: weekendsSchedulerampDownLoadBalancingAlgorithm
+    weekendsSchedulerampDownMinimumHostsPct: weekendsSchedulerampDownMinimumHostsPct
+    weekendsSchedulerampDownStartTimeHour: weekendsSchedulerampDownStartTimeHour
+    weekendsSchedulerampDownStartTimeMinute: weekendsSchedulerampDownStartTimeMinute
+    weekendsSchedulerampDownStopHostsWhen: weekendsSchedulerampDownStopHostsWhen
+    weekendsSchedulerampUpCapacityThresholdPct: weekendsSchedulerampUpCapacityThresholdPct
+    weekendsSchedulerampUpLoadBalancingAlgorithm: weekendsSchedulerampUpLoadBalancingAlgorithm
+    weekendsSchedulerampUpMinimumHostsPct: weekendsSchedulerampUpMinimumHostsPct
+    weekendsSchedulerampUpStartTimeHour: weekendsSchedulerampUpStartTimeHour
+    weekendsSchedulerampUpStartTimeMinute: weekendsSchedulerampUpStartTimeMinute
   }
   dependsOn: [
     AVDbackplaneprod
